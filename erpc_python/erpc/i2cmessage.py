@@ -11,7 +11,7 @@ class I2CMessage():
         header = bytearray(8)
         maxLen = 247
 
-        numPackets = int(math.ceil(toSend/maxLen))
+        numPackets = int(math.ceil(float(toSend)/maxLen))
         totalLen = int(numPackets*8+toSend)
 
         #make a header
@@ -21,10 +21,13 @@ class I2CMessage():
         header[2] = (totalLen & 0xFF)
         header[3] = 0x00
         header[4] = 0x01
+	header[7] = 0x01
 
         while toSend > 0:
             if toSend > maxLen:
                 header[5] = 0x80
+	    else:
+                header[5] = 0x00
 
             offset = length-toSend
             header[5] = header[5] | (offset >> 8)
@@ -36,6 +39,7 @@ class I2CMessage():
                 toSend = toSend - maxLen
             else:
                 dataByte = bytearray(data[offset:offset+toSend])
+		toSend = 0
 
             msg = [I2C.Message(header+dataByte)]
             self._i2c.transfer(dest,msg)
@@ -43,7 +47,7 @@ class I2CMessage():
 
     def I2CRead(self, dest, count):
         maxLen = 247
-        numPackets = math.ceil(toSend/MaxLen)
+        numPackets = int(math.ceil(float(count)/maxLen))
 
         toReceive = count
         dataToReturn = bytearray(count)
