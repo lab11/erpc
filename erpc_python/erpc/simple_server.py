@@ -52,6 +52,7 @@ class SimpleServer(Server):
             except RequestError as e:
                 print("Error while processing request: %s" % (e))
 		print("going to sleep")
+                time.sleep(3)
 		os.system("echo mem > /sys/power/state")
 		print("woke up")
 

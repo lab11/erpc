@@ -161,7 +161,7 @@ class I2CTransport(FramedI2CTransport):
     def _base_receive(self, count):
         self._i2cmessenger.I2CSend(0x19,bytearray([0x01]))
 	time.sleep(0.001)
-        return self._i2c.read(0x19,count)
+        return self._i2cmessenger.I2CRead(0x19,count)
 
 class ConnectionClosed(Exception):
     pass

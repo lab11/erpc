@@ -56,13 +56,13 @@ class I2CMessage():
                 rec = bytearray(255)
                 msg = [I2C.Message(rec,read=True)]
                 self._i2c.transfer(dest,msg)
-                dataToReturn[count-toReceive:count-toReceive+maxLen] = rec[8:]
+                dataToReturn[count-toReceive:count-toReceive+maxLen] = msg[0].data[8:]
                 toReceive = toReceive - maxLen
             else:
-                rec = bytearray((8+toReceive))
+                rec = bytearray(8+toReceive)
                 msg = [I2C.Message(rec,read=True)]
                 self._i2c.transfer(dest,msg)
-                dataToReturn[count-toReceive:] = rec[8:]
+                dataToReturn[count-toReceive:] = msg[0].data[8:]
                 toReceive = 0
 
         return dataToReturn
