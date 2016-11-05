@@ -1,0 +1,8 @@
+@include("myAlloc.h")
+@outputDir("erpc_outputs")
+program test_arithmetic
+
+interface ArithmeticServices {
+    add(float a, float b) -> float
+    sub(float a, float b) -> float
+}

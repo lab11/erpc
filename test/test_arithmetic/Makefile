@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (C) 2014 Freescale Semiconductor, Inc.
+# Copyright (C) 2014-2015 Freescale Semiconductor, Inc. All Rights Reserved.
 #
 # THIS SOFTWARE IS PROVIDED BY FREESCALE "AS IS" AND ANY EXPRESS OR IMPLIED
 # WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -13,39 +13,7 @@
 # OF SUCH DAMAGE.
 #-------------------------------------------------------------------------------
 
-include ../mk/erpc_common.mk
+include ../../mk/erpc_common.mk
 
-.NOTPARALLEL:
+include ../mk/unit_test.mk
 
-# Unit test directories.
-SUBDIRS = \
-		test_annotations \
-		test_arrays \
-		test_binary \
-		test_builtin \
-		test_arithmetic \
-		test_const \
-		test_doxyComments \
-		test_enums \
-		test_lists \
-		test_struct \
-		test_typedef \
-		test_unions
-
-.PHONY: all
-all : $(SUBDIRS)
-
-# Unit Test Targets
-.PHONY: test-tcp
-test-tcp: TESTTARGET := test-tcp
-test-tcp: all
-
-.PHONY: test-serial
-test-serial: TESTTARGET := test-serial
-test-serial: all
-
-clean::
-	@echo "Cleaning test results..."
-	@rm -rf results
-
-include $(ERPC_ROOT)/mk/subdirs.mk

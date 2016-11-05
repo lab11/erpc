@@ -1,7 +1,7 @@
 #! ruby -I../core -I.
 require 'rubygems'
 
-unit_tests = ['test_annotations','test_arrays','test_binary','test_builtin','test_const','test_enums','test_lists','test_struct','test_typedef','test_unions']
+unit_tests = ['test_arithmetic','test_annotations','test_arrays','test_binary','test_builtin','test_const','test_enums','test_lists','test_struct','test_typedef','test_unions']
 
 erpcgen_path = ARGV[0]
 transport = ARGV[1]
