@@ -44,11 +44,11 @@
 typedef long speed_t;
 #else
 
-#include <sys/select.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <termios.h>
-#include <unistd.h>
+//#include <sys/select.h>
+//#include <sys/time.h>
+//#include <sys/types.h>
+//#include <termios.h>
+//#include <unistd.h>
 
 #endif
 

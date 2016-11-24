@@ -34,7 +34,7 @@
 int main(int argc, char **argv)
 {
     erpc_transport_t transport;
-    transport = erpc_transport_serial_init("/dev/ttyMFD2", 115200);
+    transport = erpc_transport_serial_init("/dev/ttyUSB0", 115200);
     erpc_client_init(transport);
 
     add(5,6);

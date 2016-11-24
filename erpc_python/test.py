@@ -23,7 +23,7 @@ def server():
         def quit(self):
             return exit(0)
 
-    transport = erpc.transport.TCPTransport('localhost', SERVER_PORT, True)
+    transport = erpc.transport.SerialTransport('/dev/ttyMFD1', 115200, True)
     server = erpc.simple_server.SimpleServer(transport, erpc.basic_codec.BasicCodec)
     mathHandler = MathServiceHandler()
     quitHandler = ServerServiceHandler()

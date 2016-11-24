@@ -32,7 +32,7 @@
 
 #include "framed_transport.h"
 #include <string>
-#include <termios.h>
+//#include <termios.h>
 
 /*!
  * @addtogroup serial_transport
@@ -53,7 +53,7 @@ namespace erpc {
 class SerialTransport : public FramedTransport
 {
 public:
-    SerialTransport(const char *portName, speed_t baudRate);
+    SerialTransport(const char *portName, uint32_t baudRate);
     virtual ~SerialTransport();
 
     erpc_status_t init(uint8_t vtime, uint8_t vmin);
@@ -63,9 +63,9 @@ private:
     virtual erpc_status_t underlyingReceive(uint8_t *data, uint32_t size);
 
 private:
-    int m_serialHandle;     /*!< */
-    const char *m_portName; /*!< */
-    speed_t m_baudRate;     /*!< */
+        int m_serialHandle;     /*!< */
+ //   const char *m_portName; /*!< */
+//    speed_t m_baudRate;     /*!< */
 };
 
 } // namespace erpc

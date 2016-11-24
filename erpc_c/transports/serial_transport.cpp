@@ -29,33 +29,51 @@
 
 #include "serial_transport.h"
 #include "message_buffer.h"
-#include "serial.h"
+//#include "serial.h"
 #include <cassert>
 #include <cstdio>
 #include <string>
-#include <termios.h>
+#include <console.h>
+//#include <termios.h>
+#include <tock.h>
+
 
 using namespace erpc;
+
+volatile uint32_t received = 0;
+char StrBuf[256];
+
+//this is a tock callback
+void receive_message(int len,
+                int unused __attribute__ ((unused)),
+                int unused1 __attribute__ ((unused)),
+                void* args __attribute__ ((unused))) {
+    received += len;
+    putstr("cb");
+    //getAuto(StrBuf,size-received,receive_message,NULL);
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-SerialTransport::SerialTransport(const char *portName, speed_t baudRate)
+SerialTransport::SerialTransport(const char *portName, uint32_t baudRate)
 : m_serialHandle(0)
-, m_portName(portName)
-, m_baudRate(baudRate)
+//, m_portName(portName)
+//, m_baudRate(baudRate)
 {
 }
 
 SerialTransport::~SerialTransport()
 {
-    serial_close(m_serialHandle);
+    //serial_close(m_serialHandle);
 }
 
 erpc_status_t SerialTransport::init(uint8_t vtime, uint8_t vmin)
 {
-    m_serialHandle = serial_open(m_portName);
+ /*   m_serialHandle = serial_open(m_portName);
     if (-1 == m_serialHandle)
     {
         return kErpcStatus_InitFailed;
@@ -75,19 +93,34 @@ erpc_status_t SerialTransport::init(uint8_t vtime, uint8_t vmin)
     if (-1 == tcflush(m_serialHandle, TCIOFLUSH))
     {
         return kErpcStatus_InitFailed;
-    }
+    } */
     return kErpcStatus_Success;
 }
 
 erpc_status_t SerialTransport::underlyingSend(const uint8_t *data, uint32_t size)
 {
-    uint32_t bytesWritten = serial_write(m_serialHandle, (char *)data, size);
+    //uint32_t bytesWritten = serial_write(m_serialHandle, (char *)data, size);
+    for(uint32_t i = 0; i < size; i++) {
+        putnstr((const char *)(&(data[i])),1);
+    }
 
-    return size != bytesWritten ? kErpcStatus_SendFailed : kErpcStatus_Success;
+    return kErpcStatus_Success;
 }
 erpc_status_t SerialTransport::underlyingReceive(uint8_t *data, uint32_t size)
 {
-    uint32_t bytesRead = serial_read(m_serialHandle, (char *)data, size);
+    //uint32_t bytesRead = serial_read(m_serialHandle, (char *)data, size);
+    received = 0;
 
-    return size != bytesRead ? kErpcStatus_ReceiveFailed : kErpcStatus_Success;
+    //get the next message
+    while(received < size) {
+        putstr("ga");
+        getauto(StrBuf+received, size-received, receive_message, NULL);
+        putstr("yi");
+        yield();
+        putstr("ay");
+    }
+
+    memcpy(data,(uint8_t*)StrBuf,size);
+
+    return size != received ? kErpcStatus_ReceiveFailed : kErpcStatus_Success;
 }

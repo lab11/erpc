@@ -28,6 +28,7 @@
  */
 
 #include "client_manager.h"
+#include "console.h"
 
 using namespace erpc;
 #if !(__embedded_cplusplus)
@@ -49,6 +50,7 @@ RequestContext ClientManager::createRequest(bool isOneway)
 erpc_status_t ClientManager::performRequest(RequestContext &request)
 {
     // Send invocation request to server.
+    // debug teh message request
     erpc_status_t err = m_transport->send(request.getCodec()->getBuffer());
     if (err)
     {
