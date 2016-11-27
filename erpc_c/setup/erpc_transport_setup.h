@@ -72,6 +72,9 @@ erpc_transport_t erpc_transport_serial_init(const char *portName, long baudRate)
  */
 erpc_transport_t erpc_transport_spi_master_init(void *baseAddr, uint32_t baudRate, uint32_t srcClock_Hz);
 
+//setup the rpc i2c masterslave transport
+erpc_transport_t erpc_transport_i2c_master_slave_init(uint8_t RPCServerAddress, uint8_t responseAddress);
+
 /*!
  * @brief Create a SPI slave transport.
  */
