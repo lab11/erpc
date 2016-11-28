@@ -31,6 +31,7 @@ import struct
 import serial
 import socket
 import threading
+import mraa
 from .crc16 import crc16
 from .client import RequestError
 
@@ -45,6 +46,49 @@ class Transport(object):
 
     def receive(self):
         raise NotImplementedError()
+
+class FramedI2CTransport(Transport):
+    HEADER_LEN = 4
+
+    def __init__(self):
+        super(FramedTransport, self).__init__()
+        self._sendLock = threading.Lock()
+        self._receiveLock = threading.Lock()
+
+    def send(self, message):
+        try:
+            self._sendLock.acquire()
+            crc = crc16(message)
+            header = bytearray(struct.pack('<HH', len(message), crc))
+            assert len(header) == self.HEADER_LEN
+            self._base_send(header + message)
+        finally:
+            self._sendLock.release()
+
+    def receive(self):
+        try:
+            self._receiveLock.acquire()
+
+            # Read fixed size header containing the message length.
+            headerData = self._base_receive(self.HEADER_LEN)
+            messageLength, crc = struct.unpack('<HH', headerData)
+
+            # Now we know the length, read the rest of the message.
+            data = self._base_receive(messageLength + self.HEADER_LEN)
+            data = data[4:]
+            computedCrc = crc16(data)
+            if computedCrc != crc:
+                raise RequestError("invalid message CRC")
+            return data
+        finally:
+            self._receiveLock.release()
+
+    def _base_send(self, data):
+        raise NotImplementedError()
+
+    def _base_receive(self):
+        raise NotImplementedError()
+
 
 class FramedTransport(Transport):
     HEADER_LEN = 4
@@ -101,6 +145,23 @@ class SerialTransport(FramedTransport):
 
     def _base_receive(self, count):
         return self._serial.read(count)
+
+class I2CTransport(FramedI2CTransport):
+    def __init__(self, i2cNum, serverAddr, **kwargs):
+        super(SerialTransport, self).__init__()
+        self._i2cNum = i2cNum
+        self._serverAddr = serverAddr
+        self._i2c = mraa.I2c(i2cNum)
+        self._i2c.address(serverAddr)
+
+    def close(self):
+        self._serial.close()
+
+    def _base_send(self, data):
+        self._i2c.write(0x02 + data)
+
+    def _base_receive(self, count):
+        return self._i2c.readBytesReg(0x01,count)
 
 class ConnectionClosed(Exception):
     pass

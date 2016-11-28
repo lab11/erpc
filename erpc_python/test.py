@@ -23,7 +23,7 @@ def server():
         def quit(self):
             return exit(0)
 
-    transport = erpc.transport.SerialTransport('/dev/ttyMFD1', 115200, True)
+    transport = erpc.transport.I2CTransport(6,0x19)
     server = erpc.simple_server.SimpleServer(transport, erpc.basic_codec.BasicCodec)
     mathHandler = MathServiceHandler()
     quitHandler = ServerServiceHandler()
@@ -34,7 +34,7 @@ def server():
     server.run()
 
 def client():
-    transport = erpc.transport.TCPTransport('localhost', SERVER_PORT, False)
+    transport = erpc.transport.SerialTransport('/dev/ttyUSB0', 115200)
     clientManager = erpc.client.ClientManager(transport, erpc.basic_codec.BasicCodec)
 
     myClient = erpc_test.client.ArithmeticClient(clientManager)
