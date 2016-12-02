@@ -1,5 +1,6 @@
 #include "i2c_master_slave_transport.h"
 #include "tock.h"
+#include "gpio.h"
 #include "i2c_master_slave.h"
 #include <cassert>
 #include <cstdio>
@@ -16,9 +17,11 @@ static uint8_t master_read_buf[BUFFER_SIZE];
 static uint8_t slave_write_buf[BUFFER_SIZE];
 volatile static bool rpc_done;
 
-static void i2c_master_slave_callback(int callback_type, int length, int unused, void* callback_args) {
+void i2c_master_slave_callback(int callback_type, int length, int unused, void* callback_args) {
     if(callback_type == CB_SLAVE_WRITE) {
         rpc_done = true;
+    } else if(callback_type == CB_MASTER_WRITE) {
+        gpio_clear(11);
     }
 }
 
@@ -40,12 +43,13 @@ I2CMasterSlaveTransport::~I2CMasterSlaveTransport()
 erpc_status_t I2CMasterSlaveTransport::init()
 {
     //setup the callbacks and allocate the necessary buffers
+    i2c_master_slave_set_callback(i2c_master_slave_callback, NULL);
     i2c_master_slave_set_master_write_buffer(master_write_buf,BUFFER_SIZE);
     i2c_master_slave_set_master_read_buffer(master_read_buf,BUFFER_SIZE);
     i2c_master_slave_set_slave_write_buffer(slave_write_buf,BUFFER_SIZE);
     i2c_master_slave_set_slave_address(m_responseAddress);
+    i2c_master_slave_listen();
 
-    i2c_master_slave_set_callback(i2c_master_slave_callback, NULL);
 
     return kErpcStatus_Success;
 }
@@ -53,15 +57,16 @@ erpc_status_t I2CMasterSlaveTransport::init()
 erpc_status_t I2CMasterSlaveTransport::underlyingReceive(uint8_t *data, uint32_t size) {
 
     //listen for the response from the storage master
-    i2c_master_slave_listen();
 
-    while(!rpc_done) {
+    /*while(!rpc_done) {
         yield();
-    }
+    }*/
 
     if(size == 4) {
         //trying to receive the header
+        yield();
         memcpy(data,slave_write_buf,4);
+        gpio_clear(11);
     } else {
         //trying to receive the body
         memcpy(data,slave_write_buf+4,size);
