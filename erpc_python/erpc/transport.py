@@ -31,6 +31,7 @@ import struct
 import serial
 import socket
 import threading
+import time
 import mraa
 from .crc16 import crc16
 from .client import RequestError
@@ -51,7 +52,7 @@ class FramedI2CTransport(Transport):
     HEADER_LEN = 4
 
     def __init__(self):
-        super(FramedTransport, self).__init__()
+        super(FramedI2CTransport, self).__init__()
         self._sendLock = threading.Lock()
         self._receiveLock = threading.Lock()
 
@@ -148,7 +149,7 @@ class SerialTransport(FramedTransport):
 
 class I2CTransport(FramedI2CTransport):
     def __init__(self, i2cNum, serverAddr, **kwargs):
-        super(SerialTransport, self).__init__()
+        super(I2CTransport, self).__init__()
         self._i2cNum = i2cNum
         self._serverAddr = serverAddr
         self._i2c = mraa.I2c(i2cNum)
@@ -158,10 +159,12 @@ class I2CTransport(FramedI2CTransport):
         self._serial.close()
 
     def _base_send(self, data):
-        self._i2c.write(0x02 + data)
+        self._i2c.write(bytearray([0x02]) + data)
 
     def _base_receive(self, count):
-        return self._i2c.readBytesReg(0x01,count)
+        self._i2c.write(bytearray([0x01]))
+	time.sleep(0.001)
+        return self._i2c.read(count)
 
 class ConnectionClosed(Exception):
     pass

@@ -30,6 +30,7 @@
 from __future__ import print_function
 
 import threading
+import os
 from .server import (Service, Server)
 from .client import RequestError
 
@@ -43,8 +44,15 @@ class SimpleServer(Server):
         while self._run:
             try:
                 self._receive_request()
+		print("going to sleep")
+		os.system("echo mem > /sys/power/state")
+		print("woke up")
             except RequestError as e:
                 print("Error while processing request: %s" % (e))
+		print("going to sleep")
+		os.system("echo mem > /sys/power/state")
+		print("woke up")
+
 
     def stop(self):
         self._run = False
