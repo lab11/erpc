@@ -45,6 +45,7 @@ class SimpleServer(Server):
             try:
                 self._receive_request()
 		print("going to sleep")
+                time.sleep(3)
 		os.system("echo mem > /sys/power/state")
 		print("woke up")
             except RequestError as e:
