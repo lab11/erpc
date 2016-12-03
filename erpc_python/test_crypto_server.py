@@ -27,7 +27,7 @@ def server():
     transport = erpc.transport.I2CTransport(6,0x19)
     server = erpc.simple_server.SimpleServer(transport, erpc.basic_codec.BasicCodec)
     cryptoHandler = CryptoServiceHandler()
-    cryptoService = erpc_test.server.CryptoService(cryptoHandler)
+    cryptoService = test_crypt.server.CryptoService(cryptoHandler)
     server.add_service(cryptoService)
     server.run()
 
