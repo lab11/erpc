@@ -11,7 +11,6 @@ using namespace erpc;
 // Variables
 ////////////////////////////////////////////////////////////////////////////////
 
-static uint8_t data_buffer[128];
 
 ////////////////////////////////////////////////////////////////////////////////
 // Code
@@ -38,11 +37,12 @@ erpc_status_t I2CMasterSlaveTransport::init()
 erpc_status_t I2CMasterSlaveTransport::underlyingReceive(uint8_t *data, uint32_t size) {
 
     uint32_t len;
+    uint8_t data_buffer[1024];
 
     if(size == 4) {
         uint8_t src = 0x00;
         while(src != m_RPCServerAddress) {
-            len = message_recv(data_buffer,2048, &src);
+            len = message_recv(data_buffer,700, &src);
         }
         memcpy(data,data_buffer,4);
     } else {
@@ -56,6 +56,7 @@ erpc_status_t I2CMasterSlaveTransport::underlyingReceive(uint8_t *data, uint32_t
 erpc_status_t I2CMasterSlaveTransport::underlyingSend(const uint8_t *data, uint32_t size)
 {
     static uint8_t header[4];
+    uint8_t data_buffer[1024];
 
     if(size == 4) {
         //this is a header, just store the data and send it in the next call.
