@@ -1,0 +1,5 @@
+program audio
+
+interface Audio {
+    process_buf(list<uint8> data @length(len), uint32 len) -> uint8
+}

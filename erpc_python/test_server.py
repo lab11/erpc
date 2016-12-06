@@ -6,16 +6,13 @@ import sys
 import math
 import random
 import erpc
-#from Crypto.Signature import PKCS1_v1_5
-#from Crypto.Hash import SHA
-#from Crypto.PublicKey import RSA
 
-import test_crypt
+import test_crypt as rpc
 
 def server():
     transport = erpc.transport.I2CTransport(6,0x19)
     server = erpc.simple_server.SimpleServer(transport, erpc.basic_codec.BasicCodec)
-    services = test_crypt.get_services()
+    services = rpc.get_services()
     for service in services:
     	server.add_service(service)
     server.run()
