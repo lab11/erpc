@@ -78,7 +78,7 @@ erpc_status_t {$iface.serviceClassName}::{$fn.name}_shim(Codec * codec, uint32_t
 {%   endfor -- parametersTo1Core %}
     // Invoke the actual served function.
 {%   if fn.returnValue.type.isNotVoid %}
-    {$fn.returnValue.resultVariable};
+    {$fn.returnValue.resultVariable} = 0;
 {%   endif %}
 {$addInfraErrorChecks("    ", fn.serverPrototype)}
 {%   if fn.isReturnValue %}
