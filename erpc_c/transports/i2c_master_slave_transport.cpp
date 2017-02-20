@@ -1,7 +1,7 @@
 #include "i2c_master_slave_transport.h"
 #include "tock.h"
 #include "gpio.h"
-#include "message.h"
+#include "signbus_io_interface.h"
 #include <cassert>
 #include <cstdio>
 
@@ -29,7 +29,7 @@ I2CMasterSlaveTransport::~I2CMasterSlaveTransport()
 
 erpc_status_t I2CMasterSlaveTransport::init()
 {
-    message_init(m_responseAddress);
+    signbus_io_init(m_responseAddress);
 
     return kErpcStatus_Success;
 }
@@ -42,7 +42,7 @@ erpc_status_t I2CMasterSlaveTransport::underlyingReceive(uint8_t *data, uint32_t
     if(size == 4) {
         uint8_t src = 0x00;
         while(src != m_RPCServerAddress) {
-            len = message_recv(data_buffer,700, &src);
+            len = signbus_io_recv(data_buffer,700, &src);
         }
         memcpy(data,data_buffer,4);
     } else {
@@ -67,7 +67,7 @@ erpc_status_t I2CMasterSlaveTransport::underlyingSend(const uint8_t *data, uint3
         data_buffer[0] = 0x01;
         memcpy(data_buffer+1,header,4);
         memcpy(data_buffer+5,data,size);
-        message_send(m_RPCServerAddress,data_buffer,size+1+4);
+        signbus_io_send(m_RPCServerAddress,data_buffer,size+1+4);
     }
 
     return kErpcStatus_Success;
