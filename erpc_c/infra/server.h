@@ -58,7 +58,7 @@ public:
      */
     Service(uint32_t serviceId)
     : m_serviceId(serviceId)
-    , m_next(NULL)
+    , m_next(nullptr)
     {
     }
 

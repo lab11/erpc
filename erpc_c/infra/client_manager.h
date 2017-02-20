@@ -61,11 +61,11 @@ public:
      * This function initializes object attributes.
      */
     ClientManager()
-    : m_messageFactory(NULL)
-    , m_codecFactory(NULL)
-    , m_transport(NULL)
+    : m_messageFactory(nullptr)
+    , m_codecFactory(nullptr)
+    , m_transport(nullptr)
     , m_sequence(0)
-    , m_errorHandler(NULL)
+    , m_errorHandler(nullptr)
     {
     }
 

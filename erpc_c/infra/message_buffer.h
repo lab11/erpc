@@ -62,7 +62,7 @@ public:
      * This function initializes object attributes.
      */
     MessageBuffer()
-    : m_buf(0)
+    : m_buf(nullptr)
     , m_len(0)
     , m_used(0)
     {
@@ -161,8 +161,8 @@ public:
          * This function initializes object attributes.
          */
         Cursor()
-        : m_buffer(NULL)
-        , m_pos(NULL)
+        : m_buffer(nullptr)
+        , m_pos(nullptr)
         , m_remaining(0)
         {
         }
