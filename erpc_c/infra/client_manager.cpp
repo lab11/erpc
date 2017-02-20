@@ -56,14 +56,14 @@ erpc_status_t ClientManager::performRequest(RequestContext &request)
     //that header
     if(request.isOneway()) {
         signpost_processing_oneway_send(request.getCodec()->getBuffer()->get(),
-                                    request.getCodec()->getUsed());
+                                    request.getCodec()->getBuffer()->getUsed());
     } else {
         //the first call should be nonblocking and perform the send
         signpost_processing_twoway_send(request.getCodec()->getBuffer()->get(),
-                                    request.getCoded()->getUsed());
+                                    request.getCodec()->getBuffer()->getUsed());
         //the second call provides a clean buffer for receiving
-        request.getCoded()->getBuffer()->setUsed(0);
-        request.getCoded()->reset();
+        request.getCodec()->getBuffer()->setUsed(0);
+        request.getCodec()->reset();
         uint16_t size = 0;
         signpost_processing_twoway_receive(request.getCodec()->getBuffer()->get(),
                                                                         &size);
