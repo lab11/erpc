@@ -42,7 +42,7 @@ erpc_status_t I2CMasterSlaveTransport::underlyingReceive(uint8_t *data, uint32_t
     if(size == 4) {
         uint8_t src = 0x00;
         while(src != m_RPCServerAddress) {
-            len = signbus_io_recv(data_buffer,700, &src);
+            len = signbus_io_recv(700, data_buffer, &src);
         }
         memcpy(data,data_buffer,4);
     } else {
