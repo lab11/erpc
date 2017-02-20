@@ -26,7 +26,7 @@ else
     MARCH ?=    # -m32 or -m64
 endif
 
-CXXFLAGS += -std=gnu++11 -D LINUX -Wunused-variable -Wno-deprecated-register -Wno-narrowing -Werror $(MARCH)
+CXXFLAGS += -std=gnu++11 -D LINUX -Wunused-variable -Wno-deprecated-register -Wno-narrowing -Wno-tautological-undefined-compare -Werror $(MARCH)
 CFLAGS   += -std=gnu11 -D LINUX -D _GNU_SOURCE -Werror $(MARCH)
 YYFLAGS  += -Wno-other
 LLFLAGS  +=
