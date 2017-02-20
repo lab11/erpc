@@ -29,6 +29,7 @@
 
 #include "client_manager.h"
 #include "console.h"
+#include "signpost_api.h"
 
 using namespace erpc;
 #if !(__embedded_cplusplus)
@@ -49,9 +50,34 @@ RequestContext ClientManager::createRequest(bool isOneway)
 
 erpc_status_t ClientManager::performRequest(RequestContext &request)
 {
-    // Send invocation request to server.
-    // debug teh message request
-    erpc_status_t err = m_transport->send(request.getCodec()->getBuffer());
+    //this implementation was changed to work with the signpost stack
+    //this is much (much) cleaner than trying to get it to work with
+    //their whole stack - just need to make sure that we can still make
+    //that header
+    if(request.isOneway()) {
+        signpost_processing_oneway_send(request.getCodec()->getBuffer()->get(),
+                                    request.getCodec()->getUsed());
+    } else {
+        //the first call should be nonblocking and perform the send
+        signpost_processing_twoway_send(request.getCodec()->getBuffer()->get(),
+                                    request.getCoded()->getUsed());
+        //the second call provides a clean buffer for receiving
+        request.getCoded()->getBuffer()->setUsed(0);
+        request.getCoded()->reset();
+        uint16_t size = 0;
+        signpost_processing_twoway_receive(request.getCodec()->getBuffer()->get(),
+                                                                        &size);
+        request.getCodec()->getBuffer()->setUsed(size);
+
+        erpc_status_t err = verifyReply(request);
+        if(err) {
+            return err;
+        }
+    }
+
+    return kErpcStatus_Success;
+
+    /*erpc_status_t err = m_transport->send(request.getCodec()->getBuffer());
     if (err)
     {
         return err;
@@ -79,7 +105,7 @@ erpc_status_t ClientManager::performRequest(RequestContext &request)
         }
     }
 
-    return kErpcStatus_Success;
+    return kErpcStatus_Success;*/
 }
 
 erpc_status_t ClientManager::verifyReply(RequestContext &request)
