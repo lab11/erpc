@@ -36,25 +36,26 @@ from .server import (Service, Server)
 from .client import RequestError
 
 class SimpleServer(Server):
-    def __init__(self, transport=None, codecClass=None):
+    def __init__(self, transport=None, codecClass=None, signbus=None):
         super(SimpleServer, self).__init__(transport, codecClass)
         self._run = True
+        self._signpost = signbus
 
     def run(self):
         self._run = True
         while self._run:
             try:
-                self._receive_request()
-		print("going to sleep")
+                print("going to sleep")
                 time.sleep(3)
-		os.system("echo mem > /sys/power/state")
-		print("woke up")
+                os.system("echo mem > /sys/power/state")
+                print("woke up")
+                self._receive_request()
             except RequestError as e:
                 print("Error while processing request: %s" % (e))
-		print("going to sleep")
+                print("going to sleep")
                 time.sleep(3)
-		os.system("echo mem > /sys/power/state")
-		print("woke up")
+                os.system("echo mem > /sys/power/state")
+                print("woke up")
 
 
     def stop(self):
@@ -62,6 +63,10 @@ class SimpleServer(Server):
 
     def _receive_request(self):
         msg = self.transport.receive()
+
+        if(msg[0] == "~" or msg[0] == "/"):
+            pass
+            #we will just assume this is an init call
 
         inCodec = self.codec_class()
         inCodec.buffer = msg

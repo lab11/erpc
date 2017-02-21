@@ -32,9 +32,10 @@ import serial
 import socket
 import threading
 import time
-import i2cmessage
+#import i2cmessage
 from .crc16 import crc16
 from .client import RequestError
+import signpost
 
 ##
 # @brief Base transport class.
@@ -48,13 +49,14 @@ class Transport(object):
     def receive(self):
         raise NotImplementedError()
 
-class FramedI2CTransport(Transport):
+class FramedSignpostTransport(Transport):
     HEADER_LEN = 4
 
-    def __init__(self):
-        super(FramedI2CTransport, self).__init__()
+    def __init__(self, signbus):
+        super(FramedSignpostTransport, self).__init__()
         self._sendLock = threading.Lock()
         self._receiveLock = threading.Lock()
+        self._signpost = signbus
 
     def send(self, message):
         try:
@@ -62,7 +64,8 @@ class FramedI2CTransport(Transport):
             crc = crc16(message)
             header = bytearray(struct.pack('<HH', len(message), crc))
             assert len(header) == self.HEADER_LEN
-            self._base_send(header + message)
+            #self._base_send(header + message)
+            self._signpost.send_rpc_response(header + message)
         finally:
             self._sendLock.release()
 
@@ -70,13 +73,11 @@ class FramedI2CTransport(Transport):
         try:
             self._receiveLock.acquire()
 
-            # Read fixed size header containing the message length.
-            headerData = self._base_receive(self.HEADER_LEN)
-            messageLength, crc = struct.unpack('<HH', headerData)
+            self._signpost.send_read_rpc()
+            head = self._signpost.read_from_slave(ModuleAddress.Storage, 4)
+            length, crc = struct.unpack('<HH',head)
+            data = self._signpost.read_from_slave(ModuleAddress.Storage, length)
 
-            # Now we know the length, read the rest of the message.
-            data = self._base_receive(messageLength + self.HEADER_LEN)
-            data = data[4:]
             computedCrc = crc16(data)
             if computedCrc != crc:
                 raise RequestError("invalid message CRC")
@@ -89,6 +90,21 @@ class FramedI2CTransport(Transport):
 
     def _base_receive(self):
         raise NotImplementedError()
+
+
+class SignpostTransport(FramedSignpostTransport):
+    def __init__(self, **kwargs):
+        super(SignpostTransport, self).__init__()
+
+    def close(self):
+        pass
+
+    def _base_send(self, data):
+        pass
+
+    def _base_receive(self, count):
+        pass
+
 
 
 class FramedTransport(Transport):
@@ -147,21 +163,21 @@ class SerialTransport(FramedTransport):
     def _base_receive(self, count):
         return self._serial.read(count)
 
-class I2CTransport(FramedI2CTransport):
-    def __init__(self, i2cNum, serverAddr, **kwargs):
-        super(I2CTransport, self).__init__()
-        self._i2cmessenger = i2cmessage.I2CMessage()
-
-    def close(self):
-        self._serial.close()
-
-    def _base_send(self, data):
-        self._i2cmessenger.I2CSend(0x19,bytearray([0x02]) + data)
-
-    def _base_receive(self, count):
-        self._i2cmessenger.I2CSend(0x19,bytearray([0x01]))
-	time.sleep(0.001)
-        return self._i2cmessenger.I2CRead(0x19,count)
+#class I2CTransport(FramedI2CTransport):
+#    def __init__(self, i2cNum, serverAddr, **kwargs):
+#        super(I2CTransport, self).__init__()
+#        self._i2cmessenger = i2cmessage.I2CMessage()
+#
+#    def close(self):
+#        self._serial.close()
+#
+#    def _base_send(self, data):
+#        self._i2cmessenger.I2CSend(0x19,bytearray([0x02]) + data)
+#
+#    def _base_receive(self, count):
+#        self._i2cmessenger.I2CSend(0x19,bytearray([0x01]))
+#        time.sleep(0.001)
+#        return self._i2cmessenger.I2CRead(0x19,count)
 
 class ConnectionClosed(Exception):
     pass

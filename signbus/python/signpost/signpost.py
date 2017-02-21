@@ -77,8 +77,12 @@ class EdisonApiClient():
                 payload = [])
 
 
-    def send_rpc_response(self, response_type):
-        raise NotImplementedError
+    def send_rpc_response(self, message):
+        self._signbus.send(dest=ModuleAddress.Storage,
+                frame_type=FrameType.Command,
+                api_type=ApiType.Processing,
+                message_type=ProcessingApiMessageType.EdisonResponse,
+                payload = message)
 
     def read_from_slave(self, dest, count):
         # testing. I don't care about args right this moment
