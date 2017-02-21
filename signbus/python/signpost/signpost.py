@@ -70,7 +70,7 @@ class EdisonApiClient():
                 )
 
     def send_read_rpc(self):
-        self._signbus.send(dest=Storage,
+        self._signbus.send(dest=ModuleAddress.Storage,
                 frame_type=FrameType.Command,
                 api_type=ApiType.Processing,
                 message_type=ProcessingApiMessageType.EdisonReadMessage,

@@ -51,22 +51,28 @@ class NetworkLayer():
         overhead = len(buf)
         goodput_len = NetworkLayer.MAX_MESSAGE_SIZE - overhead
 
+        offset = 0
+
         while len(data) > goodput_len:
             to_send = bytes(buf)
 
             # set fragment flag
             to_send[0] |= (1 << NetworkLayer.FLAG_FRAGMENT_SHIFT)
+            to_send += offset.to_bytes(2,'big')
 
             # move a chunk of data to send buffer
             to_send += data[:goodput_len]
             data = data[goodput_len:]
             assert len(to_send) == NetworkLayer.MAX_MESSAGE_SIZE
 
+            offset += goodput_len
+
             # add this to send list
             msgs.append(periphery.I2C.Message(to_send))
 
         # send the last chunk
         to_send = bytes(buf)
+        to_send += offset.to_bytes(2,'big')
         to_send += data[:goodput_len]
         data = data[goodput_len:]
         msgs.append(periphery.I2C.Message(to_send))
