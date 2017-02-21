@@ -74,9 +74,11 @@ class FramedSignpostTransport(Transport):
             self._receiveLock.acquire()
 
             self._signpost.send_read_rpc()
-            head = self._signpost.read_from_slave(ModuleAddress.Storage, 4)
+            head = self._signpost.read_from_slave(signpost.ModuleAddress.Storage, 4)
+            print(head)
+            print("".join("%02x" % b for b in head))
             length, crc = struct.unpack('<HH',head)
-            data = self._signpost.read_from_slave(ModuleAddress.Storage, length)
+            data = self._signpost.read_from_slave(signpost.ModuleAddress.Storage, length)
 
             computedCrc = crc16(data)
             if computedCrc != crc:
