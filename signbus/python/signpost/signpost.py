@@ -36,10 +36,7 @@ class ProcessingApiMessageType(enum.IntEnum):
     OneWayMessage = 1
     TwoWayMessage = 2
     EdisonReadMessage = 3
-    EdisonInitResponseMessage = 4
-    EdisonOneWayResponseMessage = 5
-    EdisonOneWayDoneResponseMessage = 6
-    EdisonTwoWayResponseMessage = 7
+    EdisonResponseMessage = 4
 
 class EdisonApiClient():
     DEFAULT_EDISON_MODULE_ADDRESS = 0x40
@@ -81,7 +78,7 @@ class EdisonApiClient():
         self._signbus.send(dest=ModuleAddress.Storage,
                 frame_type=FrameType.Command,
                 api_type=ApiType.Processing,
-                message_type=ProcessingApiMessageType.EdisonResponse,
+                message_type=ProcessingApiMessageType.EdisonResponseMessage,
                 payload = message)
 
     def read_from_slave(self, dest, count):
